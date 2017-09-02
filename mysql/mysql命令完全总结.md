@@ -94,6 +94,8 @@ mysql> show databases;
 ### 4.3 创建数据库
 
 > 命令：**create database** <数据库名>;
+>
+> **CREATE DATABASE [IFNOT EXISTS] db_name [CHARSET utf8]**
 
 ```sql
 mysql> create database sunshine;
@@ -139,6 +141,8 @@ mysql> select ((4 * 4) / 10 ) + 25;
 ### 4.5 删除数据库
 
 > 命令：**drop database** <数据库名>;
+>
+> **DROP DATABASE [IFEXISTS] db_name;**
 
 ```sql
 mysql> drop database sunshine;
@@ -245,6 +249,10 @@ mysql> alter table sunshine add unique name_index2(cardnumber);
 ```sql
 mysql> alter table sunshine drop index name_index2;
 ```
+
+### 5.6 显示表的结构定义 
+
+> 命令：DESCRIBE table_name;
 
 ## 6. 表数据操作
 
@@ -362,9 +370,45 @@ mysql> source /Users/sunshine/database.sql;
 
 `mysql` 使用 `auto_increment`，`sqlserver` 使用 `identity(1,1)`
 
-## 9. 常用SQL
+### 8.3 字符集
 
-### 9.1 串接字符串 CONCAT 与 AS
+> SHOW CREATE DATABASE db_name;
+>
+> ALTER DATABASE db_name DEFAULT CHARACTER SET utf8
+
+## 9. MySQL数据类型
+
+1. 整型浮点型
+ （1）整型
+ 	tinyint   	最小型整数  0-255(-128 ~ +127)   1个字节
+ 	smallint  	小型整数    0-65535            2个字节
+ 	mediumint	中型整数    0-1677万           3个字节
+ 	int          一般整数    0-21亿             4个字节
+ 	bigint       最大整数    0-42亿              8个字节
+ （2）浮点型
+ 	float(M,D)	单精度(精确到小数点后7位)    M代表长度，D代表小数位数
+ 		举例：float(6,2) //总长度为6位，小数位数为2位，小数点不算。存的最大值为9999.99
+ 	double(M,D) 双精度(精确到小数点后15位)   M代表长度，D代表小数位数。
+
+2. 日期时间型
+
+ ```
+ date   日期型   格式为： “YYYY-mm-dd”
+ time   时间型   格式为： “00:00:00”
+ ```
+
+3. 字符和文本型
+ （1）字符型
+ 	char(M)	  	0-255	 固定长度的字符串   如：邮编、手机号码、电话号码等
+ 	varchar(M) 	0-65535  可变长度的字符串   如：新闻标题、家庭地址、毕业院校等。
+ （2）文本型
+ 	tinytext     0-255      小型文本
+ 	Text        0-1670万  中型文本
+ 	longtext    0-42亿     大型文本
+
+## 10. 常用SQL
+
+### 10.1 串接字符串 CONCAT 与 AS
 
 ```sql
 mysql> select CONCAT(name, " ", sex) 
@@ -373,7 +417,7 @@ mysql> select CONCAT(name, " ", sex)
      > where degree > 0; 
 ```
 
-### 9.2 PRIMARY KEY 
+### 10.2 PRIMARY KEY 
 
 ````
 DROP TABLE IF EXISTS `sun`;
