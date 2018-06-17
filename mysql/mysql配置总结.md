@@ -219,3 +219,6 @@ shutdown -h now
 mv /var/lib/mysql/mysql.sock /var/lib/mysql/mysql.sock.bak
 service mysqld start
 ```
+
+
+

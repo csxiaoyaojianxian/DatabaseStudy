@@ -16,7 +16,16 @@ By CS逍遥剑仙
 [TOC]
 
 ## 1. 连接mysql
-> 格式： mysql -h主机地址 -u用户名 －p用户密码
+mysql是C/S结构，分服务端(mysqld)和客户端(mysql)
+
+```shell
+# windows服务端
+$ net start mysql
+$ net stop mysql
+```
+
+
+> 格式： mysql -h主机地址 -P端口 -u用户名 －p用户密码
 
 **1. 连接本机mysql**
 终端进入目录 `mysql/bin`
@@ -30,7 +39,9 @@ mysql -h 192.168.0.1 -u root -p19931128;
 ```
 **3. 退出mysql**
 ```sql
-exit
+mysql> exit;
+# 或quit
+mysql> \q;
 ```
 ## 2. 修改密码
 > 格式：mysqladmin -u用户名 -p旧密码 password 新密码
@@ -77,7 +88,7 @@ mysql> flush privileges;
 
 ## 4. 数据库操作
 
-### 4.1 连接数据库
+### 4.1 选择数据库
 > 命令： **use** <数据库名>;
 
 使用USE语句为当前数据库做标记，不会影响访问其它数据库中的表
@@ -91,7 +102,17 @@ mysql> SELECT a_name,e_name FROM author,db2.editor WHERE author.editor_id = db2.
 
 ```sql
 mysql> show databases;
+# 部分匹配，'_'匹配当前位置单个字符，'%'匹配指定位置多个字符
+mysql> show databases like 'm_database';
+mysql> show databases like '%database';
 ```
+
+默认表：
+
+1. `information_schema` 保存数据库所有的结构信息(表、库)
+2. `mysql` 核心数据库，存放权限关系
+3. `performance_schema` 效率库
+4. `test` 测试，空库
 
 ### 4.3 创建数据库
 
@@ -151,9 +172,45 @@ mysql> drop database sunshine;
 mysql> drop database if exists sunshine;
 ```
 
-## 5. 表操作
+### 4.6 修改数据库属性
 
-### 5.1 创建数据表
+修改字符集
+
+```
+# 显示建表语句
+mysql> SHOW CREATE DATABASE db_name;
+# 修改默认字符集
+mysql> ALTER DATABASE db_name DEFAULT CHARACTER SET utf8
+# 或
+mysql> alter database db_name charset gbk;
+```
+
+## 5. 表结构操作
+
+### 5.1 显示表
+
+> 命令：**show tables**;
+>
+> 命令：**show tables like** '匹配模式';
+
+### 5.2 显示表的结构定义
+
+> 命令：**DESCRIBE** table_name;
+>
+> 命令：**desc** table_name;
+>
+> 命令：**show columns from** table_name;
+>
+> 命令：**show create table**  table_name;
+
+```
+mysql> describe sunshine;
+mysql> desc sunshine;
+mysql> show columns from sunshine;
+mysql> show create table sunshine;
+```
+
+### 5.2 创建数据表
 
 | 字段名      | 数字类型    | 数据宽度  | 是否为空 | 是否主键        | 自动增加           | 默认值  |
 | -------- | ------- | ----- | ---- | ----------- | -------------- | ---- |
@@ -163,6 +220,10 @@ mysql> drop database if exists sunshine;
 | address  | varchar | 50    | 是    |             |                | 江苏   |
 | birthday | date    |       | 是    |             |                |      |
 | degree   | double  | 16, 2 | 是    |             |                |      |
+
+> 命令：**create table** <表名> (<字段> <类型> <其他>, <字段> <类型> <其他>,…) [表选项]
+
+
 ```sql
 create table sunshine
 (
@@ -172,26 +233,40 @@ create table sunshine
     address varchar(50) default "江苏",
     birthday date,
     degree double(16,2)
-); 
+) charset utf8; 
 ```
+
+复制已有表结构，只要使用 "数据库.表名"，就可以在任何数据库下访问其他数据库的表名
+
+> 命令：**create table** <新表名> like <表名>;
 
 注：更多建表操作见附录
 
-### 5.2 表字段操作
+### 5.3 表字段操作
 
 **增加字段：**
 
-> 命令：**alter table** <表名> **add**  <字段> <类型> <其他>;
+> 命令：**alter table** <表名> **add**  [column] <字段> <类型> <其他> [first/after <字段>];
 >
 > **ALTER TABLE** table_name **ADD** field_name field_type;
 
 ```sql
-mysql> alter table sunshine add salary int(4) default 0
+mysql> alter table sunshine add salary int(4) default 0;
+# 插入到第一个字段
+mysql> alter table sunshine add id int first;
 ```
 
 **修改原字段名称及类型：**
 
-> 命令：**ALTER TABLE** table_name **CHANGE** old_field_name new_field_name field_type;
+> 命令：**ALTER TABLE** table_name **CHANGE** old_field_name new_field_name field_type [属性 位置] ;
+>
+> 命令：**alter table** table_name **modify** field_name new_type [属性 位置]
+
+```
+# 修改名称
+mysql> alter table sunshine change id iId int;
+mysql> alter table sunshine modify iId int(20);
+```
 
 **删除字段：**
 
@@ -199,7 +274,7 @@ mysql> alter table sunshine add salary int(4) default 0
 mysql> ALTER TABLE table_name DROP field_name;
 ```
 
-### 5.3 修改表名
+### 5.4 修改表名
 
 > 命令：**rename table** <原表名> **to** <新表名>;
 
@@ -209,16 +284,16 @@ mysql> rename table OldTable to NewTable;
 
 注意：不能有活动的事务或对锁定的表操作，须有对原表的 `ALTER` 和 `DROP` 权限，和对新表的 `CREATE` 和 `INSERT` 权限
 
-### 5.4 删除数据表
+### 5.5 删除数据表
 
-> 命令：**drop table** <表名>;
+> 命令：**drop table** <表名> [,<表名2>…];
 
 ```sql
 mysql> drop table sunshine; -- 普通删除
 mysql> DROP TABLE IF EXISTS `sunshine`; -- 安全删除
 ```
 
-### 5.5 索引操作
+### 5.6 索引操作
 
 **加索引**
 
@@ -252,9 +327,15 @@ mysql> alter table sunshine add unique name_index2(cardnumber);
 mysql> alter table sunshine drop index name_index2;
 ```
 
-### 5.6 显示表的结构定义 
+### 5.7 设置表属性
 
-> 命令：DESCRIBE table_name;
+表属性(表选项): engine / charset / collate
+
+> 命令：**alter table** <表名> <表选项> [=] <值>;
+
+```
+mysql> alter table tbSunshine charset gbk;
+```
 
 ## 6. 表数据操作
 
@@ -372,11 +453,20 @@ mysql> source /Users/sunshine/database.sql;
 
 `mysql` 使用 `auto_increment`，`sqlserver` 使用 `identity(1,1)`
 
-### 8.3 字符集
+### 8.3 字符集编码问题
 
-> SHOW CREATE DATABASE db_name;
->
-> ALTER DATABASE db_name DEFAULT CHARACTER SET utf8
+```
+mysql> show variables like 'character_set_%';
+mysql> set names utf8;
+```
+
+客户端传入数据给服务端：client:  character_set_client
+
+服务端返回数据给客户端：server:  character_set_results
+
+客户端与服务端之间的连接：connection:  character_set_connection
+
+set names 字符集统一了三层的字符集
 
 ## 9. MySQL数据类型
 
