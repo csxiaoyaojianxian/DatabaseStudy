@@ -305,6 +305,8 @@ mysql> alter table sunshine add index name_index1(name);
 
 **加主关键字索引**
 
+详细操作见`mysql列属性.md`文档
+
 > 命令：**alter table** <表名> **add primary key** <(字段名)>;
 
 ```sql
@@ -312,6 +314,8 @@ mysql> alter table sunshine add primary key(id);
 ```
 
 **加唯一限制条件索引**
+
+详细操作见`mysql列属性.md`文档
 
 > 命令：**alter table** <表名> **add unique** <索引名 (字段名)>;
 

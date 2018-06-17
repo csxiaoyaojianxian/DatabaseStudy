@@ -155,9 +155,9 @@ longtext    0-42亿     	2^32+4		4个字节	大型文本
 系统提供1-2字节存储枚举数据，通过计算enum列举的具体值选择实际存储空间：如果数据值列表 <=255 个，分配1字节，如果 > 255 && <=65535，分配2字节
 
 ```
-mysql> create table tbTest {
+mysql> create table tbTest (
           gender enum('男','女','保密')
-       } charset utf8;
+       ) charset utf8;
 mysql> insert into tbTest values('男');
 mysql> insert into tbTest values('女');
 ```
@@ -193,9 +193,9 @@ mysql> insert into tbTest values('女');
 基本语法：set( '值1', '值2', '值3', … )
 
 ```
-mysql> create table tbTest {
+mysql> create table tbTest (
           hobby set('小提琴','小号','乒乓球','游泳','羽毛球','编程','轮滑','烹饪')
-       } charset utf8;
+       ) charset utf8;
 mysql> insert into tbTest values('小提琴,乒乓球,编程');
 ```
 
@@ -228,3 +228,4 @@ mysql> insert into tbTest values('小提琴,乒乓球,编程');
 3字节 => 24个选项
 
 8字节 => 64个选项
+
