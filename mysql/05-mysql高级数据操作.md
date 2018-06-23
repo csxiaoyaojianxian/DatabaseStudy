@@ -653,3 +653,46 @@ mysql> select * from tbClass where id <> all(select class_id from tbStudent);
 | :--: | :--: |
 |  3   | 3班  |
 
+
+
+## 9. SQL数据备份与还原
+
+mysql中提供了专门用于备份SQL的客户端：mysqldump
+
+SQL备份需要备份结构，因此产生的备份文件特别大，不适合特大型数据备份，也不适合数据变换频繁型数据库备份。
+
+三种备份形式：
+
+1. 整库备份（只需提供数据库名）
+2. 单表备份
+3. 多表备份：数据库后跟多张表
+
+> 基本语法：mysqldump -hPup 数据库名 [表1   [表2…]]  >  备份文件地址
+
+```
+$ mysqldump -hlocalhost -P3306 -uroot -proot dbDatabase > /home/ubuntu/backup/dbbackup.sql
+$ mysqldump -hlocalhost -P3306 -uroot -proot dbDatabase tbStudent tbClass> /home/ubuntu/backup/dbbackup.sql
+```
+
+mysqldump备份的数据中没有关于数据库本身的操作，都是针对表级别的操作，当进行数据（SQL还原），必须指定数据库
+
+两种还原形式：
+
+1. 使用 mysql 客户端
+
+> 基本语法：mysql –hPup 数据库 < 文件位置
+
+2. 使用导入数据的SQL指令 (必须先进入到对应的数据库)
+
+> 基本语法：source  SQL文件位置;
+
+3. 复制SQL指令在mysql客户端中粘贴执行（不推荐）
+
+```
+$ mysql –uroot -proot dbTest < /home/ubuntu/backup/dbbackup.sql
+mysql> source /home/ubuntu/backup/dbbackup.sql;
+```
+
+
+
+ 
