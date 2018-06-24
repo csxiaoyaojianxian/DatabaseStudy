@@ -1,4 +1,6 @@
-# mysql列属性(字段属性)
+# mysql学习总结03 — 列属性(字段属性)
+
+[TOC]
 
 mysql中的6个列属性：null，default，comment，primary key，unique key，auto_increment
 
@@ -85,9 +87,8 @@ mysql> create table tbTest (
 
 ### 4.5 主键约束
 
-1、主键数据不能为空
-
-2、主键数据不能重复
+1. 主键数据不能为空
+2. 主键数据不能重复
 
 ### 4.6 主键分类
 
@@ -99,9 +100,8 @@ mysql> create table tbTest (
 
 主键也可以用来保证字段数据唯一性，但一张表只有一个主键
 
-1、	唯一键在一张表中可以有多个。
-
-2、	唯一键允许字段数据为NULL，NULL可以有多个（NULL不参与比较）
+1. 唯一键在一张表中可以有多个。
+2. 唯一键允许字段数据为NULL，NULL可以有多个（NULL不参与比较）
 
 ### 5.1 创建唯一键
 
@@ -122,7 +122,9 @@ mysql> create table tbTest (
 
 #### 表后增加
 
-> 基本语法：alter table <表名> add unique key(<字段1[,字段2,...]>);
+> 基本语法：
+>
+> alter table <表名> add unique key(<字段1[,字段2,...]>);
 
 ### 5.2 查看唯一键
 
@@ -142,7 +144,9 @@ CREATE TABLE `tbTest` (
 
 ### 5.3 删除唯一键
 
-> 基本语法：alter table <表名> drop index < 唯一键名>;
+> 基本语法：
+>
+> alter table <表名> drop index < 唯一键名>;
 
 ### 5.4 修改唯一键
 
@@ -161,7 +165,7 @@ mysql> create table tbTest (
 
 ## 6. auto_increment 自动增长
 
-通常自动增长用于逻辑主键，只适用于数值
+通常自动增长用于逻辑主键，只适用于数值，sqlserver中使用`identity(1,1)`
 
 ### 6.1 自动增长原理
 
@@ -190,7 +194,9 @@ CREATE TABLE `tbTest` (
 
 可以通过修改表结构来修改自动增长
 
-> 基本语法：alter table <表名> auto_increment = <值>;
+> 基本语法：
+>
+> alter table <表名> auto_increment = <值>;
 
 ### 6.4 删除自动增长
 
@@ -207,3 +213,5 @@ CREATE TABLE `tbTest` (
 1. 一张表最多只有一个自增长，自增长会上升到表选项中
 2. 如果数据插入没有触发自增长(给定了数据)，那么自增长不会表现，但是会根据当前用户设定的值初始化下一个值，例如当前id=1，插入数据给定id=3，则AUTO_INCREMENT=4
 3. 自增长修改时，值可以较大，但不能比当前已有的自增长字段的值小
+
+![](http://www.csxiaoyao.com/src/img/sign.jpg)

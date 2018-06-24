@@ -1,4 +1,6 @@
-# mysql数据类型
+# mysql学习总结02 — 数据类型
+
+[TOC]
 
 ## 1. 整数型
 
@@ -229,3 +231,4 @@ mysql> insert into tbTest values('小提琴,乒乓球,编程');
 
 8字节 => 64个选项
 
+![](http://www.csxiaoyao.com/src/img/sign.jpg)

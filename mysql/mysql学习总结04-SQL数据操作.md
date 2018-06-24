@@ -1,8 +1,321 @@
-# mysql高级数据操作
+# mysql学习总结04 — SQL数据操作
 
-## 1. 新增数据
+[TOC]
 
-### 1.1 多数据插入
+## 1. 数据库操作
+
+### 1.1 选择数据库
+
+> 命令： **use** <数据库名>;
+
+使用USE语句为当前数据库做标记，不会影响访问其它数据库中的表
+
+```sql
+mysql> USE db1;
+mysql> SELECT a_name,e_name FROM author,db2.editor WHERE author.editor_id = db2.editor.editor_id;   
+```
+
+### 1.2 显示数据库
+
+> 命令：**show databases**;
+
+```sql
+mysql> show databases;
+# 部分匹配，'_'匹配当前位置单个字符，'%'匹配指定位置多个字符
+mysql> show databases like 'm_database';
+mysql> show databases like '%database';
+```
+
+默认表：
+
+1. `information_schema` 保存数据库所有的结构信息(表、库)
+2. `mysql` 核心数据库，存放权限关系
+3. `performance_schema` 效率库
+4. `test` 测试，空库
+
+### 1.3 创建数据库
+
+> 命令：**create database** <数据库名>;
+>
+> **CREATE DATABASE [IFNOT EXISTS] db_name [CHARSET utf8]**
+
+```sql
+mysql> create database sunshine;
+```
+
+### 1.4 SELECT操作
+
+> 命令：**select** database();
+
+`mysql` 中 `SELECT` 命令类似于其他编程语言的 `print` 或 `write`，可用来显示字符串、数字、数学表达式的结果等
+**显示mysql的版本**
+
+```sql
+mysql> select version();
+```
+
+**显示当前时间**
+
+```sql
+mysql> select now();
+```
+
+**显示年月日**
+
+```sql
+mysql> SELECT YEAR(CURRENT_DATE);
+mysql> SELECT MONTH(CURRENT_DATE);
+mysql> SELECT DAYOFMONTH(CURRENT_DATE);
+```
+
+**显示字符串**
+
+```sql
+mysql> SELECT "sunshine";
+```
+
+**当计算器用**
+
+```sql
+mysql> select ((4 * 4) / 10 ) + 25; 
+```
+
+### 1.5 删除数据库
+
+> 命令：**drop database** <数据库名>;
+>
+> **DROP DATABASE [IFEXISTS] db_name;**
+
+```sql
+mysql> drop database sunshine;
+mysql> drop database if exists sunshine;
+```
+
+### 1.6 修改数据库属性
+
+修改字符集
+
+```
+# 显示建表语句
+mysql> SHOW CREATE DATABASE db_name;
+# 修改默认字符集
+mysql> ALTER DATABASE db_name DEFAULT CHARACTER SET utf8
+# 或
+mysql> alter database db_name charset gbk;
+```
+
+## 2. 基础表结构操作
+
+### 2.1 显示表
+
+> 命令：**show tables**;
+>
+> 命令：**show tables like** '匹配模式';
+
+### 2.2 显示表的结构定义
+
+> 命令：**DESCRIBE** table_name;
+>
+> 命令：**desc** table_name;
+>
+> 命令：**show columns from** table_name;
+>
+> 命令：**show create table**  table_name;
+
+```
+mysql> describe sunshine;
+mysql> desc sunshine;
+mysql> show columns from sunshine;
+mysql> show create table sunshine;
+```
+
+### 2.3 创建数据表
+
+| 字段名   | 数字类型 | 数据宽度 | 是否为空 | 是否主键    | 自动增加       | 默认值 |
+| -------- | -------- | -------- | -------- | ----------- | -------------- | ------ |
+| id       | int      | 4        | 否       | primary key | auto_increment |        |
+| name     | char     | 20       | 否       |             |                |        |
+| sex      | int      | 4        | 否       |             |                | 0      |
+| address  | varchar  | 50       | 是       |             |                | 江苏   |
+| birthday | date     |          | 是       |             |                |        |
+| degree   | double   | 16, 2    | 是       |             |                |        |
+
+> 命令：**create table** <表名> (<字段> <类型> <其他>, <字段> <类型> <其他>,…) [表选项]
+
+```sql
+create table sunshine
+(
+    id int(4) auto_increment not null primary key,
+    name char(20) not null,
+    sex int(4) not null default 0,
+    address varchar(50) default "江苏",
+    birthday date,
+    degree double(16,2)
+) charset utf8; 
+```
+
+复制已有表结构，只要使用 "数据库.表名"，就可以在任何数据库下访问其他数据库的表名
+
+> 命令：**create table** <新表名> like <表名>;
+
+注：更多建表操作见附录
+
+### 2.4 表字段操作
+
+**增加字段：**
+
+> 命令：**alter table** <表名> **add**  [column] <字段> <类型> <其他> [first/after <字段>];
+>
+> **ALTER TABLE** table_name **ADD** field_name field_type;
+
+```sql
+mysql> alter table sunshine add salary int(4) default 0;
+# 插入到第一个字段
+mysql> alter table sunshine add id int first;
+```
+
+**修改原字段名称及类型：**
+
+> 命令：**ALTER TABLE** table_name **CHANGE** old_field_name new_field_name field_type [属性 位置] ;
+>
+> 命令：**alter table** table_name **modify** field_name new_type [属性 位置]
+
+```
+# 修改名称
+mysql> alter table sunshine change id iId int;
+mysql> alter table sunshine modify iId int(20);
+```
+
+**删除字段：**
+
+```sql
+mysql> ALTER TABLE table_name DROP field_name;
+```
+
+### 2.5 修改表名
+
+> 命令：**rename table** <原表名> **to** <新表名>;
+
+```sql
+mysql> rename table OldTable to NewTable;
+```
+
+注意：不能有活动的事务或对锁定的表操作，须有对原表的 `ALTER` 和 `DROP` 权限，和对新表的 `CREATE` 和 `INSERT` 权限
+
+### 2.6 删除数据表
+
+> 命令：**drop table** <表名> [,<表名2>…];
+
+```sql
+mysql> drop table sunshine; -- 普通删除
+mysql> DROP TABLE IF EXISTS `sunshine`; -- 安全删除
+```
+
+### 2.7 索引操作
+
+**加索引**
+
+> 命令：**alter table** <表名> **add index** <索引名 (字段名1[，字段名2 …])>;
+
+```sql
+mysql> alter table sunshine add index name_index1(name);
+```
+
+**加主关键字索引**
+
+详细操作见`mysql列属性.md`文档
+
+> 命令：**alter table** <表名> **add primary key** <(字段名)>;
+
+```sql
+mysql> alter table sunshine add primary key(id);
+```
+
+**加唯一限制条件索引**
+
+详细操作见`mysql列属性.md`文档
+
+> 命令：**alter table** <表名> **add unique** <索引名 (字段名)>;
+
+```sql
+mysql> alter table sunshine add unique name_index2(cardnumber);
+```
+
+**删除索引**
+
+> 命令：**alter table** <表名> **drop index** <索引名>;
+
+```sql
+mysql> alter table sunshine drop index name_index2;
+```
+
+### 2.8 设置表属性
+
+表属性(表选项): engine / charset / collate
+
+> 命令：**alter table** <表名> <表选项> [=] <值>;
+
+```
+mysql> alter table tbSunshine charset gbk;
+```
+
+## 3. 基础表数据操作
+
+此部分基础操作可直接跳过
+
+### 3.1 表插入数据
+
+> 命令：**insert into** <表名 [( <字段名1>[,..<字段名n > ])]> **values** <( 值1 )[, ( 值n )]>;
+
+```sql
+mysql> insert into sunshine values(1,'Sun',99.99),(2,'Jian',98.99),(3,'Fent', 97.99);
+```
+
+注意：insert into每次只能插入一条记录
+
+### 3.2 查询表数据
+
+**查询所有行**
+
+> 命令：**select** <字段1，字段2，...> **from** < 表名 > **where** < 表达式 >;
+
+```sql
+mysql> select * from sunshine;
+```
+
+**查询前n行数据 LIMIT**
+
+```sql
+mysql> select * from sunshine order by id limit 0,2;
+```
+
+### 3.3 删除表数据
+
+```sql
+mysql> DELETE FROM sunshine WHERE name='csxiaoyao';
+```
+
+### 3.4 修改表数据
+
+> 命令：**update** <表名> **set** <字段> **=** <新值,…> **where** <条件>
+
+```sql
+mysql> update sunshine set name='csxiaoyao' where id=1;
+```
+
+**单表UPDATE**
+
+> 命令：**UPDATE** `[LOW_PRIORITY][IGNORE]` tbl_name **SET** col_name1=expr1 `[, col_name2=expr2 ...][WHERE where_definition] [ORDER BY …][LIMIT row_count]`
+
+**多表UPDATE**
+
+> 命令：**UPDATE** `[LOW_PRIORITY][IGNORE]` table_references **SET** col_name1=expr1 `[, col_name2=expr2 ...][WHERE where_definition]`
+
+注意：如果指定ORDER BY子句，则按被指定顺序对行更新；LIMIT子句限制被更新行数
+
+## 4. 新增数据
+
+### 4.1 多数据插入
 
 > 基本语法：insert into <表名> [(<字段列表>)] values(<值列表>), (<值列表>),…;
 
@@ -10,11 +323,11 @@
 mysql> insert into tbTest values('sun', 25), ('jian', 26), ('feng', 27);
 ```
 
-### 1.2 主键冲突
+### 4.2 主键冲突
 
 主键冲突的解决方案：
 
-1. **主键冲突更新：**
+**1. 主键冲突更新：**
 
 > 基本语法：insert into <表名> [(<字段列表>)] values(<值列表>) on duplicate key update <字段> = <新值>;
 
@@ -22,7 +335,7 @@ mysql> insert into tbTest values('sun', 25), ('jian', 26), ('feng', 27);
 mysql> insert into tbTest values('stu0001','sun') on duplicate key update stu_name = 'sun';
 ```
 
-2. **主键冲突替换：**
+**2. 主键冲突替换：**
 
 > 基本语法：replace into <表名> [(<字段列表>)] values(<值列表>);
 
@@ -30,7 +343,7 @@ mysql> insert into tbTest values('stu0001','sun') on duplicate key update stu_na
 mysql> replace into tbTest values('stu0001','sun');
 ```
 
-### 1.3 蠕虫复制
+### 4.3 蠕虫复制
 
 从已有数据中获取数据并插入到数据表中
 
@@ -45,13 +358,13 @@ mysql> insert into tbTest(stu_name) select stu_name from tbTest;
 > 1. 蠕虫复制通常是重复数据，没有多少业务意义，可以在短期内快速增加表的数据量从而测试表压力，还可以通过大量数据来测试表的效率(索引)
 > 2. 蠕虫复制时要注意主键冲突
 
-## 2. 更新数据
+## 5. 更新数据
 
 更新数据时通常跟随where条件，如果没有条件，是全表更新数据，可以使用 limit 限制更新的数量
 
 > 基本语法：update <表名> set <字段名> = <新值> [where <判断条件>] limit <数量>;
 
-## 3. 删除数据
+## 6. 删除数据
 
 删除数据时通常跟随where条件，如果没有条件，是删除全表数据，可以使用 limit 限制删除的数量
 
@@ -67,13 +380,13 @@ Truncate能够重置表的自增长选项，相当于先 `drop` 再 `create`
 mysql> truncate tbTest;
 ```
 
-## 4. 查询数据
+## 7. 查询数据
 
 完整的查询指令：
 
 > SELECT  select选项  字段列表  FROM  数据源  WHERE  条件  GROUP BY  分组  HAVING  条件  ORDER BY  排序 LIMIT  限制;
 
-### 4.1 select选项
+### 7.1 select选项
 
 系统处理查询结果的方式
 
@@ -81,7 +394,7 @@ mysql> truncate tbTest;
 
 **distinct** :   去重，去除重复记录(所有字段都相同)
 
-### 4.2 字段列表
+### 7.2 字段列表
 
 若从多张表获取数据，可能存在不同表中有同名字段，需要使用别名 alias 进行区分
 
@@ -93,7 +406,7 @@ mysql> select distinct name as name1, name name2 from tbTest;
 
 结果包含两个字段：name1, name2
 
-### 4.3 from 数据源
+### 7.3 from 数据源
 
 from是为前面的查询提供数据，数据源只要是符合二维表结构的数据(如实体表、子查询)即可
 
@@ -105,17 +418,17 @@ from是为前面的查询提供数据，数据源只要是符合二维表结构�
 
 > 基本语法：from (select <字段列表> from <表名>) as <别名>;
 
-### 4.4 where
+### 7.4 where
 
 从数据表获取数据的时候进行条件筛选，where通过运算符进行结果比较来判断数据，注意和后面的`having`区分
 
-### 4.5 group by
+### 7.5 group by
 
 分组：根据指定的字段将数据进行分组，分组的目标是为了统计。group by 将数据按照指定的字段分组后，只会保留每组的第一条记录，如果仅想看数据显示，group by 没什么含义
 
 > 基本语法：group by <字段名>;
 
-#### 4.5.1 统计(聚合)函数
+#### 7.5.1 统计(聚合)函数
 
 > count()：统计每组中的数量，count(<字段名>)不统计为NULL的字段，count(*)统计记录数
 >
@@ -138,7 +451,7 @@ mysql> select class_id, group_concat(stu_name), count(*), max(age), min(height),
 |    1     |       张三、李四       |    2     |    28    |     170     |     98     |
 |    2     |       王五、赵六       |    2     |    25    |     172     |     99     |
 
-#### 4.5.2 多分组
+#### 7.5.2 多分组
 
 将数据按某个字段分组后，对已分组的数据再次分组
 
@@ -146,7 +459,7 @@ mysql> select class_id, group_concat(stu_name), count(*), max(age), min(height),
 
 > 基本语法：group by <字段1>,<字段2>;
 
-#### 4.5.3 分组排序
+#### 7.5.3 分组排序
 
 mysql中分组默认有排序功能，默认升序
 
@@ -163,7 +476,7 @@ mysql> select class_id, gender, count(*), group_concat(stu_name) from tbTest gro
 |    2     |   女   |    1     |         学生3          |
 |    2     |   男   |    2     |      学生1,学生2       |
 
-#### 4.5.4 回溯统计
+#### 7.5.4 回溯统计
 
 多分组后，往上统计过程中需要层层上报，称为回溯统计。每次分组向上统计的过程都会产生一次新的统计数据，而且当前数据对应的分组字段为NULL
 
@@ -183,7 +496,7 @@ mysql> select class_id, gender, count(*) from tbTest group by class_id, gender w
 |    2     |  NULL  |    3     |
 |   NULL   |  NULL  |    6     |
 
-### 4.6 having
+### 7.6 having
 
 having 的本质和 where 一样，用来进行数据条件筛选
 
@@ -205,13 +518,13 @@ having 在 group by 分组之后，可以使用聚合函数或字段别名 (wher
 >
 > where 表示将数据从磁盘取到内存，where之后的所有操作都是内存操作
 
-### 4.7 order by
+### 7.7 order by
 
 排序，默认asc升序
 
 > 基本语法：order by <字段1> [asc|desc],  <字段2> [asc|desc];  
 
-### 4.8 limit
+### 7.8 limit
 
 限制记录获取数量，常用于分页
 
@@ -221,7 +534,7 @@ having 在 group by 分组之后，可以使用聚合函数或字段别名 (wher
 
 例如：limit 0,2;  表示获取前两条记录
 
-## 5. 查询中的运算符
+## 8. 查询中的运算符
 
 **1 - 算术运算符**：  +、-、*、/、%
 
@@ -285,11 +598,11 @@ mysql> select * from tbTest where stu_id in ('stu001','stu002','stu003');
 
 `%`：匹配多个字符
 
-## 6. 联合查询
+## 9. 联合查询
 
 UNION 联合查询是可合并多个相似的选择查询的结果集。等同于将一个表追加到另一个表，从而实现将两个表的查询组合到一起。纵向合并，字段数不变，多个查询的记录数合并
 
-### 6.1 应用场景
+### 9.1 应用场景
 
 将同一张表中不同的结果（需要对应多条查询语句来实现），合并到一起展示数据
 
@@ -307,13 +620,13 @@ UNION 联合查询是可合并多个相似的选择查询的结果集。等同�
 >
 > ​      select 语句;
 
-### 6.2 union选项
+### 9.2 union选项
 
 distinct：去重 (默认)
 
 all：保存所有结果
 
-### 6.3 注意细节
+### 9.3 注意细节
 
 1. union理论上只要保证字段数一样，不需要每次拿到的数据对应的字段类型一致。永远只保留第一个select语句对应的字段名
 2. 在联合查询中，如果要使用order by，那么对应的select语句必须使用括号括起来
@@ -336,7 +649,7 @@ mysql> (select * from stu where gender = '男' order by stu_height asc limit 10)
 | stu0005 |    170     |   女   |
 | stu0002 |    160     |   女   |
 
- ## 7. 连接查询
+ ## 10. 连接查询
 
 关系：一对一，一对多，多对多
 
@@ -349,7 +662,7 @@ mysql> (select * from stu where gender = '男' order by stu_height asc limit 10)
 3. 外连接：左外连接（左连接）和右外连接（右连接）
 4. 自然连接
 
-### 7.1 交叉连接 cross join 
+### 10.1 交叉连接 cross join 
 
 **记录数** = 第一张表记录数 * 第二张表记录数;（笛卡尔积）
 
@@ -361,7 +674,7 @@ mysql> (select * from stu where gender = '男' order by stu_height asc limit 10)
 
 本质：from <表1>, <表2>;
 
-### 7.2 内连接 inner join 
+### 10.2 内连接 inner join 
 
 **记录数** = x (匹配成功的数目)；
 
@@ -405,7 +718,7 @@ mysql> select * from tbStudent as s inner join tbClass c on s.class_id = c.id;
 
 内连接通常是在对数据有精确要求的地方使用：必须保证两种表中都能进行数据匹配。
 
-### 7.3 外连接 outer join 
+### 10.3 外连接 outer join 
 
 **记录数** >= x (主表的条目数)；
 
@@ -462,7 +775,7 @@ mysql> select * from tbStudent as s right join tbClass c on s.class_id = c.id;
 
 常用的数据获取方式：获取主表和对应的从表数据（关联）
 
-### 7.4 using关键字
+### 10.4 using关键字
 
 **字段数** = 第一张表字段数  + 第二张表字段数 - on对应的字段数
 
@@ -490,7 +803,7 @@ mysql> select * from tbStudent left join tbClass using(class_id);
 |    2     | stu0006 |   xxx    | 2班  |
 |    1     | stu0007 |   xxx    | 1班  |
 
-## 8. 子查询
+## 11. 子查询
 
 子查询 (sub query) 是一种常用计算机语言SELECT-SQL语言中嵌套查询下层的程序模块。当一个查询是另一个查询的条件时，称之为子查询
 
@@ -514,7 +827,7 @@ mysql> select * from tbStudent left join tbClass using(class_id);
 
 * from子查询：子查询出现的位置在from数据源中，做数据源（表子查询）
 
-### 8.1 标量子查询
+### 11.1 标量子查询
 
 标量子查询：子查询结果是一个数据（一行一列）
 
@@ -533,7 +846,7 @@ mysql> select * from tbStudent left join tbClass using(class_id);
 mysql> select * from tbClass where id = (select class_id from tbStudent where stu_name='xxx');
 ```
 
-### 8.2 列子查询
+### 11.2 列子查询
 
 列子查询：子查询结果是一列数据（一列多行）
 
@@ -552,7 +865,7 @@ mysql> select * from tbClass where id = (select class_id from tbStudent where st
 mysql> select name from tbClass where id in (select class_id from tbStudent);
 ```
 
-### 8.3 行子查询
+### 11.3 行子查询
 
 行子查询：子查询结果是一行数据（一行多列）
 
@@ -568,7 +881,7 @@ mysql> select name from tbClass where id in (select class_id from tbStudent);
 mysql> select * from tbStudent where (stu_age, stu_height) = (select max(stu_age), max(stu_height) from tbStudent);
 ```
 
-### 8.4 表子查询
+### 11.4 表子查询
 
 表子查询：子查询结果是多行多列数据（多行多列）
 
@@ -589,7 +902,7 @@ mysql> select * from tbStudent where (stu_age, stu_height) = (select max(stu_age
 mysql> select * from (select * from tbStudent order by stu_height desc) as tbTemp group by class_id;
 ```
 
-### 8.5 exists子查询
+### 11.5 exists子查询
 
 exists子查询：根据子查询结果进行判断，1代表结果存在，0代表不存在
 
@@ -610,7 +923,7 @@ mysql> select * from tbClass as c where exists(select stu_id from tbStudent as s
 |  1   | 1班  |
 |  2   | 2班  |
 
-### 8.6 列子查询特定关键字
+### 11.6 列子查询特定关键字
 
 #### in
 
@@ -653,46 +966,163 @@ mysql> select * from tbClass where id <> all(select class_id from tbStudent);
 | :--: | :--: |
 |  3   | 3班  |
 
+## 12. 外键
 
+### 12.1 概念
 
-## 9. SQL数据备份与还原
+foreign key : 一张表(从表)中有一个字段(外键)，保存的值指向另外一张表(主表)的主键 
 
-mysql中提供了专门用于备份SQL的客户端：mysqldump
+### 12.2 外键的操作
 
-SQL备份需要备份结构，因此产生的备份文件特别大，不适合特大型数据备份，也不适合数据变换频繁型数据库备份。
+#### 增加外键
 
-三种备份形式：
+**方案1**：创建表时增加外键（类似主键）
 
-1. 整库备份（只需提供数据库名）
-2. 单表备份
-3. 多表备份：数据库后跟多张表
-
-> 基本语法：mysqldump -hPup 数据库名 [表1   [表2…]]  >  备份文件地址
-
-```
-$ mysqldump -hlocalhost -P3306 -uroot -proot dbDatabase > /home/ubuntu/backup/dbbackup.sql
-$ mysqldump -hlocalhost -P3306 -uroot -proot dbDatabase tbStudent tbClass> /home/ubuntu/backup/dbbackup.sql
-```
-
-mysqldump备份的数据中没有关于数据库本身的操作，都是针对表级别的操作，当进行数据（SQL还原），必须指定数据库
-
-两种还原形式：
-
-1. 使用 mysql 客户端
-
-> 基本语法：mysql –hPup 数据库 < 文件位置
-
-2. 使用导入数据的SQL指令 (必须先进入到对应的数据库)
-
-> 基本语法：source  SQL文件位置;
-
-3. 复制SQL指令在mysql客户端中粘贴执行（不推荐）
+> 基本语法：
+>
+> [constraint '<外键名>'] foreign key(<外键字段>) references <主表>(<主键>);
 
 ```
-$ mysql –uroot -proot dbTest < /home/ubuntu/backup/dbbackup.sql
-mysql> source /home/ubuntu/backup/dbbackup.sql;
+mysql> create table tbStudent(
+    ->    id int primary key auto_increment,
+    ->    name varchar(10) not null,
+    ->    class_id int,
+    ->    -- 增加外键，创建完后 class_id 对应的 key 为 MUL 多索引，外键本身也是一种普通索引
+    ->    foreign key(class_id) references tbClass(id)
+    -> )chatset utf8;
+```
+
+**方案2**：创建表后增加外键
+
+> 基本语法：
+>
+> alter table <从表> add [constraint <外键名>] foreign key(<外键字段>) references <主表>(<主键>);
+
+```
+mysql> alter table tbStudent add constraint 'stu_class_ibfk_1' foreign key(class_id) references tbClass(id);
+```
+
+#### 修改&删除外键
+
+外键不允许修改，只能先删除后增加。外键创建时会自动增加一个普通索引，但删除时仅删除外键不删除索引，如果要删除需要手动删除
+
+> 基本语法：
+>
+> alter table <从表> drop foreign key <外键名>;
+>
+> alter table <表名> drop index <索引名>;
+
+```
+mysql> alter mysql tbStudent drop foreign key 'stu_class_ibfk_1';
+```
+
+### 12.3 外键基本要求
+
+1. 外键字段与主表主键字段类型完全一致
+2. 外键字段与主表主键字段基本属性相同
+3. 如果是在表后增加外键，对数据有要求(从表数据与主表的关联关系)
+4. 外键只能使用innodb存储引擎，myisam不支持
+
+### 12.4 外键约束概念
+
+外键约束主要约束主表操作，从表仅约束不能插入主表不存在的数据，外键约束约束了例如：
+
+1. 从表插入数据，不能插入对应主表主键不存在的数据
+2. 主表删除数据，不能删除被从表引入的数据
+
+外键约束保证了数据的完整性(主表与从表数据一致)，外键强大的数据约束作用可能导致数据在后台变化的不可控，所以外键在实际开发中较少使用
+
+### 12.5 外键约束模式
+
+**三种约束模式**：
+
+1. district：严格模式，默认的，不允许操作
+2. cascade：级联模式，一起操作，主表变化，从表数据跟随变化
+3. set null：置空模式，主表变化（删除），从表对应记录设置为空，前提是从表中对应的外键字段允许为空
+
+ **添加外键约束模式**：
+
+> 基本语法：
+>
+> add foreign key(<外键字段>) references <主表>(<主键>)  on <约束模式>;
+
+通常在进行约束时候的时候，需要指定操作：`update`和`delete`
+
+常用的约束模式：`on update cascade, on delete set null`，更新级联，删除置空
+
+```
+mysql> alter table tbStudent add foreign key(class_id) 
+    -> references tbClass(class_id)
+    -> on update cascade
+    -> on delete set null;
+```
+
+## 13. 视图
+
+### 13.1 创建视图
+
+视图的本质是SQL指令（select语句，单表数据/连接查询/联合查询/子查询）
+
+> 基本语法：
+>
+> create view <视图名> as <select指令>;
+
+```
+mysql> create view stu_class_v as
+    -> select s.*, c.name from tbStudent as s left join tbClass as c on s.class_id = c.class_id;
+```
+
+### 13.2 查看视图结构
+
+图本身是虚拟表，所以关于表的操作都适用于视图
+
+> 基本语法：
+>
+> show tables;
+>
+> show create table[view];
+>
+> desc <视图名>；
+
+```
+mysql> show create view stu_class_v\G;
+```
+
+### 13.3 使用视图
+
+视图本身没有数据，是临时执行select语句得到的结果，视图主要用于查询操作
+
+> 基本语法：
+>
+> select <字段列表> from <视图名> [子句];
+
+```
+mysql> select * from stu_class_v;
+```
+
+### 13.4 修改视图
+
+修改视图的查询语句
+
+> 基本语法：
+>
+> alter view <视图名> as <新select指令>;
+
+```
+mysql> alter view stu_class_v as
+    -> select * from tbStudent as s left join tbClass as c using(class_id);
+```
+
+### 13.5 删除视图
+
+> 基本语法：
+>
+> drop view <视图名>;
+
+```
+mysql> drop view stu_class_v;
 ```
 
 
 
- 
+![](http://www.csxiaoyao.com/src/img/sign.jpg)
