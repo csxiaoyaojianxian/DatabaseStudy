@@ -39,6 +39,6 @@ class MyRedis{
 }
 
 $redisKey = "sunshine";
-$result = ["victorsun","csxiaoyao"];
+$result = ["csxiaoyao","csxiaoyao"];
 MyRedis::set($redisKey, $result);
 var_dump(MyRedis::get($redisKey));
