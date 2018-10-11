@@ -1,4 +1,13 @@
 # memcache学习笔记
+
+[TOC]
+
+>Write By CS逍遥剑仙
+>我的主页: [www.csxiaoyao.com](http://www.csxiaoyao.com/)
+>GitHub: [github.com/csxiaoyaojianxian](https://github.com/csxiaoyaojianxian)
+>Email: sunjianfeng@csxiaoyao.com
+>QQ: [1724338257](https://www.csxiaoyao.cn/blog/index.php/2018/09/18/02-2/wpa.qq.com/msgrd?uin=1724338257&site=qq&menu=yes)
+
 ## 1. 安装与连接
 
 ```
@@ -283,3 +292,5 @@ memcached内部不会监视记录是否过期，而是在get时查看记录的�
 算法：LRU，least Recently Used，最近最少使用算法
 
 memcache在插入新数据时，空间不足会删除最不活跃的缓存项。
+
+![](https://raw.githubusercontent.com/csxiaoyaojianxian/ImageHosting/master/img/sign.jpg)
