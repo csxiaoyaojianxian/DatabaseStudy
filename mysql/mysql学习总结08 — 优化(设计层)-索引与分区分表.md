@@ -31,6 +31,7 @@ mysql> create table t2 (
 	->	name varchar(32) not null,
 	->	age tinyint not null,
 	->	intro text,
+	#   primary key (`iId`), # 主键
 	->	unique key(name), # 唯一索引
 	->	index(age), # 普通索引
 	->	fulltext index(intro), # 全文索引
